@@ -22,7 +22,6 @@ function CodeEditor({language, onMount, value, setValue}) {
               defaultValue={CODE_SNIPPETS[language]}
               onMount={onMount}
               value={value}
-              onChange={(value) => setValue(value)}
               className="rounded-lg border border-gray-400"
             />
           </div>

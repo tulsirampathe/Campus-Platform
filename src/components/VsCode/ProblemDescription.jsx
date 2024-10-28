@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 
-function ProblemDescription() {
+function ProblemDescription({ problemData }) {
   return (
     <>
-      {/* Tabs for Description */}
-      <div className="w-full flex justify-start space-x-6 pb-2  border-b border-gray-300">
+      <div className="w-full flex justify-start space-x-6 pb-2 border-b border-gray-300">
         <button className="bg-transparent px-4 py-2 rounded-lg hover:bg-gray-100 transition duration-200 shadow">
           Description
         </button>
@@ -16,36 +16,41 @@ function ProblemDescription() {
         </button>
       </div>
 
-      {/* Problem Statement */}
       <div className="py-4">
-        <h1 className="text-2xl font-bold">Print Numbers from 1 to N</h1>
-        <p className="mt-4 leading-relaxed">
-          Write a program to print the numbers from 1 to N.
-        </p>
-        <p className="mt-4 leading-relaxed">
-          Given a positive integer N, write a program that prints all the
-          integers from 1 to N, each on a new line.
-        </p>
+        <h1 className="text-2xl font-bold">{problemData.problemTitle}</h1>
+        <p className="mt-4 leading-relaxed">{problemData.description}</p>
       </div>
 
-      {/* Examples */}
       <div className="mt-4">
-        <h2 className="text-lg font-semibold">Example 1</h2>
-        <p>Input: N = 5</p>
-        <p>Output: 1 2 3 4 5</p>
-
-        <h2 className="text-lg font-semibold mt-4">Example 2</h2>
-        <p>Input: N = 3</p>
-        <p>Output: 1 2 3</p>
+        {problemData.examples.map((example, i) => (
+          <div key={i} className="mb-2">
+            <h2 className="text-lg font-semibold">Example {i + 1}</h2>
+            <p>
+              <span className="font-semibold">Input:</span> {example.input}
+            </p>
+            <p>
+              <span className="font-semibold">Output:</span> {example.output}
+            </p>
+            {example.explanation && (
+              <p>
+                <span className="font-semibold">Explanation:</span>{" "}
+                {example.explanation}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Constraints */}
-      <div className="mt-4">
-        <ul className="list-disc pl-4">
-          <li>1 ≤ N ≤ 1000</li>
-          <li>N is a positive integer.</li>
-        </ul>
-      </div>
+      {problemData.constraints && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold">Constraint</h2>
+          <ul className="list-disc pl-4">
+            {problemData.constraints.map((constraint, index) => (
+              <li key={index}>{constraint}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </>
   );
 }

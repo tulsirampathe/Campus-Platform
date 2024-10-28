@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ContestLeftPanel from "./ContestLeftPanel";
 import ContestNavbar from "./ContestNavbar";
 import ContestRightPanel from "./ContestRightPanel";
+import { useNavigate } from "react-router-dom";
 
 function AdminContestPanel() {
   const [contestData, setContestData] = useState([]);
@@ -14,8 +15,10 @@ function AdminContestPanel() {
     constraints: [""],
     examples: [{ input: "", output: "" }],
     testCases: [{ input: "", output: "" }],
-    boilerplateCode: { cpp: "", python: "", javascript: "" }, // Store for multiple languages
+    boilerplateCode: { cpp: "", python: "", javascript: "", java: "" }, // Store for multiple languages
   });
+
+  const navigate = useNavigate()
 
   const addExample = () => {
     setProblemDetails({
@@ -63,6 +66,8 @@ function AdminContestPanel() {
   const handleSendToBackend = () => {
     console.log("Sending contest data to backend:", contestData);
     // Replace with API call
+
+    navigate('/contest-overview', { state: { contestData } });
   };
 
   const resetProblemDetails = () => {
@@ -73,7 +78,7 @@ function AdminContestPanel() {
       constraints: [""],
       examples: [{ input: "", output: "" }],
       testCases: [{ input: "", output: "" }],
-      boilerplateCode: { cpp: "", python: "", javascript: "" },
+      boilerplateCode: { cpp: "", python: "", javascript: "", java: "" },
     });
     setCurrentProblemIndex(null);
   };

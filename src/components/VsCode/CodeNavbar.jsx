@@ -1,14 +1,20 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { FiSettings, FiUser, FiX } from "react-icons/fi"; // Added FiX for close button
+import { FiSettings, FiUser } from "react-icons/fi"; // Added FiX for close button
 
-function CodeNavbar({handleRun, onSelect}) {
+function CodeNavbar({ handleRun, onSelect, toggleProblemList }) {
   return (
     <>
-       <div className="w-full h-[7vh] flex justify-between items-center px-4 border-b border-gray-300">
+      <div className="w-full h-[7vh] flex justify-between items-center px-4 border-b border-gray-300">
         {/* Left Section: Test Name */}
         <div className="flex items-center space-x-4">
-          <span className="text-lg font-semibold">Basic Logic Building 🤔</span>
+          <h1 className="text-lg font-semibold">Basic Logic Building 🤔</h1>
+          <button
+            onClick={toggleProblemList}
+            className="btn btn-secondary ml-auto bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-500 transition"
+          >
+            View Problems
+          </button>
         </div>
 
         {/* Middle Section: Run, Submit and Language Dropdown */}

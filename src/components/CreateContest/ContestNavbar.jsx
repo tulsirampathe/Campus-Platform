@@ -48,6 +48,7 @@ function ContestNavbar({
           className="bg-gray-700 p-2 rounded text-white"
         >
           <option value="cpp">C++</option>
+          <option value="java">Java</option>
           <option value="python">Python</option>
           <option value="javascript">JavaScript</option>
         </select>
