@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import ContestLeftPanel from "./ContestLeftPanel";
 import ContestNavbar from "./ContestNavbar";
 import ContestRightPanel from "./ContestRightPanel";
-import { useNavigate } from "react-router-dom";
 
 function AdminContestPanel() {
+  const location = useLocation();
+  const { contestDetails } = location.state || {};
+
   const [contestData, setContestData] = useState([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("cpp"); // Default language
+  const [selectedLanguage, setSelectedLanguage] = useState("cpp");
   const [problemDetails, setProblemDetails] = useState({
     testName: "",
     problemTitle: "",
@@ -15,31 +18,14 @@ function AdminContestPanel() {
     constraints: [""],
     examples: [{ input: "", output: "" }],
     testCases: [{ input: "", output: "" }],
-    boilerplateCode: { cpp: "", python: "", javascript: "", java: "" }, // Store for multiple languages
+    boilerplateCode: { cpp: "", python: "", javascript: "", java: "" },
   });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const addExample = () => {
-    setProblemDetails({
-      ...problemDetails,
-      examples: [...problemDetails.examples, { input: "", output: "" }],
-    });
-  };
-
-  const addTestCase = () => {
-    setProblemDetails({
-      ...problemDetails,
-      testCases: [...problemDetails.testCases, { input: "", output: "" }],
-    });
-  };
-
-  const addConstraint = () => {
-    setProblemDetails({
-      ...problemDetails,
-      constraints: [...problemDetails.constraints, ""],
-    });
-  };
+  const addExample = () => setProblemDetails({ ...problemDetails, examples: [...problemDetails.examples, { input: "", output: "" }] });
+  const addTestCase = () => setProblemDetails({ ...problemDetails, testCases: [...problemDetails.testCases, { input: "", output: "" }] });
+  const addConstraint = () => setProblemDetails({ ...problemDetails, constraints: [...problemDetails.constraints, ""] });
 
   const handleBoilerplateChange = (value) => {
     setProblemDetails({
@@ -64,10 +50,8 @@ function AdminContestPanel() {
   };
 
   const handleSendToBackend = () => {
-    console.log("Sending contest data to backend:", contestData);
-    // Replace with API call
-
-    navigate('/contest-overview', { state: { contestData } });
+    console.log("Sending contest data to backend:", contestData, contestDetails);
+    navigate("/contest-overview", { state: { contestData, contestDetails } });
   };
 
   const resetProblemDetails = () => {
@@ -90,7 +74,6 @@ function AdminContestPanel() {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      {/* Navbar */}
       <ContestNavbar
         problemDetails={problemDetails}
         setProblemDetails={setProblemDetails}
@@ -100,9 +83,7 @@ function AdminContestPanel() {
         setSelectedLanguage={setSelectedLanguage}
       />
 
-      {/* Main Panel */}
       <div className="flex h-full">
-        {/* Left Panel */}
         <ContestLeftPanel
           problemDetails={problemDetails}
           setProblemDetails={setProblemDetails}
@@ -111,7 +92,6 @@ function AdminContestPanel() {
           addTestCase={addTestCase}
         />
 
-        {/* Right Panel */}
         <ContestRightPanel
           problemDetails={problemDetails}
           selectedLanguage={selectedLanguage}
