@@ -1,27 +1,20 @@
 /* eslint-disable react/prop-types */
 import React from "react";
+import { useLocation } from "react-router-dom";
 
 function ContestNavbar({
-  problemDetails,
-  setProblemDetails,
   handleSaveProblem,
   handleSendToBackend,
   selectedLanguage,
   setSelectedLanguage,
 }) {
+  const location = useLocation();
+  const { contestDetails } = location.state || {};
   return (
     <div className="flex items-center justify-between p-4 bg-gray-800 text-white">
       {/* Left Side: Test Name */}
       <div className="font-bold text-lg">
-        <input
-          type="text"
-          placeholder="Test Name"
-          className="bg-gray-700 p-2 rounded"
-          value={problemDetails.testName}
-          onChange={(e) =>
-            setProblemDetails({ ...problemDetails, testName: e.target.value })
-          }
-        />
+        <h1 className="text-lg font-semibold">{contestDetails.contestName}</h1>
       </div>
 
       {/* Mid Section: Save Problem and Create Contest Buttons */}

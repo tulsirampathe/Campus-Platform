@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Editor } from "@monaco-editor/react";
 import React from "react";
-import { CODE_SNIPPETS } from "../../constants";
+import { CODE_SNIPPETS } from "../../constants/constant";
 
 function ContestRightPanel({
   problemDetails,

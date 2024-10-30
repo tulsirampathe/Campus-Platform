@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import ContestLeftPanel from "./ContestLeftPanel";
-import ContestNavbar from "./ContestNavbar";
-import ContestRightPanel from "./ContestRightPanel";
+import ContestLeftPanel from "../CreateContest/ContestLeftPanel";
+import ContestNavbar from "../CreateContest/ContestNavbar";
+import ContestRightPanel from "../CreateContest/ContestRightPanel";
 
 function AdminContestPanel() {
   const location = useLocation();
@@ -12,7 +12,6 @@ function AdminContestPanel() {
   const [currentProblemIndex, setCurrentProblemIndex] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("cpp");
   const [problemDetails, setProblemDetails] = useState({
-    testName: "",
     problemTitle: "",
     description: "",
     constraints: [""],
@@ -23,9 +22,21 @@ function AdminContestPanel() {
 
   const navigate = useNavigate();
 
-  const addExample = () => setProblemDetails({ ...problemDetails, examples: [...problemDetails.examples, { input: "", output: "" }] });
-  const addTestCase = () => setProblemDetails({ ...problemDetails, testCases: [...problemDetails.testCases, { input: "", output: "" }] });
-  const addConstraint = () => setProblemDetails({ ...problemDetails, constraints: [...problemDetails.constraints, ""] });
+  const addExample = () =>
+    setProblemDetails({
+      ...problemDetails,
+      examples: [...problemDetails.examples, { input: "", output: "" }],
+    });
+  const addTestCase = () =>
+    setProblemDetails({
+      ...problemDetails,
+      testCases: [...problemDetails.testCases, { input: "", output: "" }],
+    });
+  const addConstraint = () =>
+    setProblemDetails({
+      ...problemDetails,
+      constraints: [...problemDetails.constraints, ""],
+    });
 
   const handleBoilerplateChange = (value) => {
     setProblemDetails({
@@ -50,7 +61,11 @@ function AdminContestPanel() {
   };
 
   const handleSendToBackend = () => {
-    console.log("Sending contest data to backend:", contestData, contestDetails);
+    console.log(
+      "Sending contest data to backend:",
+      contestData,
+      contestDetails
+    );
     navigate("/contest-overview", { state: { contestData, contestDetails } });
   };
 
@@ -85,6 +100,7 @@ function AdminContestPanel() {
 
       <div className="flex h-full">
         <ContestLeftPanel
+          contestDetails={contestDetails}
           problemDetails={problemDetails}
           setProblemDetails={setProblemDetails}
           addConstraint={addConstraint}

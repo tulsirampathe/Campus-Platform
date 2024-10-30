@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { executeCode } from "../../api";
+import { executeCode } from "../../API/api";
 import CodeEditor from "./CodeEditor";
 import CodeNavbar from "./CodeNavbar";
 import Output from "./Output";

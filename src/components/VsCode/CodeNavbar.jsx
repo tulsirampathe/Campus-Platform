@@ -1,14 +1,19 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { FiSettings, FiUser } from "react-icons/fi"; // Added FiX for close button
+import { useLocation } from "react-router-dom";
 
 function CodeNavbar({ handleRun, onSelect, toggleProblemList }) {
+  const location = useLocation();
+  const { contestDetails } = location.state || {};
   return (
     <>
       <div className="w-full h-[7vh] flex justify-between items-center px-4 border-b border-gray-300">
         {/* Left Section: Test Name */}
         <div className="flex items-center space-x-4">
-          <h1 className="text-lg font-semibold">Basic Logic Building 🤔</h1>
+          <h1 className="text-lg font-semibold">
+            {contestDetails.contestName}
+          </h1>
           <button
             onClick={toggleProblemList}
             className="btn btn-secondary ml-auto bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-500 transition"

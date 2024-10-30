@@ -8,7 +8,7 @@ function ContestOverview() {
   const { contestData, contestDetails } = location.state; // Assuming contestDetails holds contest-level details
 
   const handleSolveClick = (problem) => {
-    navigate("/solve", { state: { problem, contestData } });
+    navigate("/solve", { state: { problem, contestData, contestDetails } });
   };
 
   return (
