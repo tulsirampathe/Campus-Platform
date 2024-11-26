@@ -12,6 +12,9 @@ const api = createApi({
     "Questions",
     "Question",
     "TestCases",
+    "Submissions",
+    "SubmitCode",
+    "Progress",
   ],
 
   endpoints: (builder) => ({
@@ -175,6 +178,58 @@ const api = createApi({
         credentials: "include",
       }),
     }),
+
+    endChallenge: builder.mutation({
+      query: (data) => ({
+        url: "challenge/end",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Progress"],
+    }),
+
+    getSubmissions: builder.query({
+      query: ({ challengeID, questionID }) => ({
+        url: `submission/challenge/${challengeID}/question/${questionID}`,
+        credentials: "include",
+      }),
+      providesTags: ["Submissions"],
+    }),
+
+    submitCode: builder.mutation({
+      query: (data) => ({
+        url: "submission/",
+        method: "POST",
+        body: data,
+        credentials: "include",
+      }),
+      invalidatesTags: ["Submissions", "Progress"],
+    }),
+
+    getProgress: builder.query({
+      query: (id) => ({
+        url: `challenge/progress/${id}`,
+        credentials: "include",
+      }),
+      providesTags: ["Progress"],
+    }),
+
+    calculateLeaderboard: builder.mutation({
+      query: (id) => ({
+        url: `challenge/leaderboard/${id}`,
+        method: "POST",
+        credentials: "include",
+      }),
+      invalidatesTags: ["Challenge"],
+    }),
+
+    getLeaderboard: builder.query({
+      query: (id) => ({
+        url: `challenge/leaderboard/${id}`,
+        credentials: "include",
+      }),
+    }),
   }),
 });
 
@@ -182,7 +237,6 @@ export default api;
 
 // Export hooks to be used in components
 export const {
-  useGetHostProfileQuery,
   useUpdateHostMutation,
   useMyChallengesQuery,
   useCreateChallengeMutation,
@@ -199,5 +253,11 @@ export const {
   useAddTestCaseMutation,
   useUpdateTestCaseMutation,
   useDeleteTestCaseMutation,
-  useJoinChallengeMutation
+  useJoinChallengeMutation,
+  useEndChallengeMutation,
+  useGetSubmissionsQuery,
+  useSubmitCodeMutation,
+  useGetProgressQuery,
+  useCalculateLeaderboardMutation,
+  useGetLeaderboardQuery,
 } = api;

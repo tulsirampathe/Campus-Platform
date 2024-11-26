@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')).render(
     <Provider store={store}>
     <App />
     <Toaster
-  position="top-right"
+  position="buttom-center"
   reverseOrder={false}
 />
     </Provider>

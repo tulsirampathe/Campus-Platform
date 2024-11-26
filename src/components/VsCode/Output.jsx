@@ -9,7 +9,7 @@ function Output({ handleCloseOutput, isLoading, ErrorMessage, output }) {
   const inputsRef = useRef(null);
   const outputsRef = useRef(null);
   const expectedRef = useRef(null);
-
+  
   // Synchronize scrolling across sections
   const handleScroll = (e, refs) => {
     const scrollTop = e.target.scrollTop;

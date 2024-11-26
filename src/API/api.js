@@ -20,22 +20,22 @@ export const executeCode = async (language, sourceCode, testCases = []) => {
             content: sourceCode,
           },
         ],
-        stdin: testCase.input, // Pass multiline input as stdin
+        stdin: testCase?.input, // Pass multiline input as stdin
       });
 
       const { run } = response.data;
       const { output, stderr, code } = run;
 
       const result = {
-        input: testCase.input, // Show input in space-separated form
-        expectedOutput: testCase.expectedOutput.trim(),
-        actualOutput: output?.trim() || "",
+        input: testCase?.input,
+        expectedOutput: String(testCase?.output).trim(), // Ensure expectedOutput is a string and trim
+        actualOutput: output.trim(), // Remove any trailing newlines or spaces from actualOutput
         executionTime: run.time || 0,
         memoryUsed: run.memory || 0,
         status:
-          output?.trim() === testCase.expectedOutput.trim() && code === 0
+          output.trim() === String(testCase?.output).trim() && code === 0
             ? "Pass"
-            : "Fail",
+            : "Fail", // Trim both for comparison
         error: stderr?.trim() || null,
       };
 
@@ -47,7 +47,6 @@ export const executeCode = async (language, sourceCode, testCases = []) => {
       }
     }
 
-    console.log("Results: ", results);
     return results;
   } catch (error) {
     console.error("Code execution failed:", error);

@@ -51,14 +51,16 @@ function BoilerplateCodePanel({ problemDetails, setProblemDetails }) {
           <h3 className="text-lg font-medium text-gray-800 mb-2">
             Boilerplate Code for {selectedLanguage}
           </h3>
-          <CodeEditor
-            language={LANGUAGE_VERSIONS[selectedLanguage]}
-            value={
-              problemDetails.boilerplateCode?.[selectedLanguage] ||
-              CODE_SNIPPETS[selectedLanguage] // Default to snippet if boilerplate is empty
-            }
-            onChange={handleCodeChange}
-          />
+          <div className="h-[400px]"> {/* Ensure the parent has a fixed height or a max height */}
+            <CodeEditor
+              language={LANGUAGE_VERSIONS[selectedLanguage]}
+              value={
+                problemDetails.boilerplateCode?.[selectedLanguage] ||
+                CODE_SNIPPETS[selectedLanguage] // Default to snippet if boilerplate is empty
+              }
+              onChange={handleCodeChange}
+            />
+          </div>
         </div>
       )}
     </div>

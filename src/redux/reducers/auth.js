@@ -7,6 +7,7 @@ const initialState = {
   questionID: null,
   questionData: null,
   challenge: null,
+  challengeProgress: null,
   loading: {
     host: false,
     user: false,
@@ -51,6 +52,9 @@ const authSlice = createSlice({
     setChallenge: (state, action) => {
       state.challenge = action.payload;
     },
+    setChallengeProgress: (state, action) => {
+      state.challengeProgress = action.payload;
+    },
   },
 });
 
@@ -67,4 +71,5 @@ export const {
   setQuestionID,
   setQuestionData,
   setChallenge,
+  setChallengeProgress,
 } = authSlice.actions;

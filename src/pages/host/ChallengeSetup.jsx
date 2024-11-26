@@ -23,7 +23,7 @@ function ChallengeSetup({ onClose }) {
   });
 
   // Handle close logic after successful mutation
-  React.useEffect(() => {
+  useEffect(() => {
     if (createStatus.isSuccess) {
       onClose();
     }

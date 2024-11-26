@@ -4,7 +4,7 @@ import HomeNavbar from "../homepage/HomeNavbar";
 import Features from "../homepage/Features";
 import Footer from "../homepage/Footer";
 
-function ProtectedLayout() {
+function NotProtectedLayout() {
   return (
     <div className="">
       {/* Navbar Section */}
@@ -26,4 +26,4 @@ function ProtectedLayout() {
   );
 }
 
-export default ProtectedLayout;
+export default NotProtectedLayout;

@@ -3,28 +3,34 @@ import React from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 
 function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
-  const handleExampleChange = (index, field, value) => {
-    const updatedExamples = problemDetails.examples.map((example, i) =>
-      i === index ? { ...example, [field]: value } : example
+  const handleExampleChange = (id, field, value) => {
+    const updatedExamples = problemDetails.examples.map((example) =>
+      example.id === id ? { ...example, [field]: value } : example
     );
-    setProblemDetails({ ...problemDetails, examples: updatedExamples });
+    setProblemDetails((prev) => ({ ...prev, examples: updatedExamples }));
   };
+
+  console.log(problemDetails.examples);
+  
 
   const addExample = () => {
-    setProblemDetails({
-      ...problemDetails,
-      examples: [
-        ...problemDetails.examples,
-        { input: "", output: "", explanation: "" },
-      ],
-    });
+    const newExample = {
+      id: Date.now(), // Unique ID for each example
+      input: "",
+      output: "",
+      explanation: "",
+    };
+    setProblemDetails((prev) => ({
+      ...prev,
+      examples: [...prev.examples, newExample],
+    }));
   };
 
-  const removeExample = (index) => {
+  const removeExample = (id) => {
     const updatedExamples = problemDetails.examples.filter(
-      (_, i) => i !== index
+      (example) => example.id !== id
     );
-    setProblemDetails({ ...problemDetails, examples: updatedExamples });
+    setProblemDetails((prev) => ({ ...prev, examples: updatedExamples }));
   };
 
   return (
@@ -80,18 +86,15 @@ function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
         <label className="block text-lg font-medium text-gray-700">
           Examples
         </label>
-        {problemDetails.examples.map((example, index) => (
+        {problemDetails.examples.map((example) => (
           <div
-            key={index}
+            key={example.id}
             className="p-4 border border-gray-200 rounded-lg shadow-sm space-y-3 bg-gray-50"
           >
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-700">
-                Example {index + 1}
-              </h3>
-              {/* Remove Example Button */}
+              <h3 className="text-lg font-medium text-gray-700">Example</h3>
               <button
-                onClick={() => removeExample(index)}
+                onClick={() => removeExample(example.id)}
                 className="text-red-500 hover:underline text-sm font-medium transform hover:scale-105 transition-transform duration-150"
               >
                 Remove
@@ -105,7 +108,7 @@ function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
                 className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
                 value={example.input}
                 onChange={(e) =>
-                  handleExampleChange(index, "input", e.target.value)
+                  handleExampleChange(example.id, "input", e.target.value)
                 }
               />
             </div>
@@ -117,7 +120,7 @@ function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
                 className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
                 value={example.output}
                 onChange={(e) =>
-                  handleExampleChange(index, "output", e.target.value)
+                  handleExampleChange(example.id, "output", e.target.value)
                 }
               />
             </div>
@@ -131,7 +134,7 @@ function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
                 className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
                 value={example.explanation}
                 onChange={(e) =>
-                  handleExampleChange(index, "explanation", e.target.value)
+                  handleExampleChange(example.id, "explanation", e.target.value)
                 }
               />
             </div>
@@ -142,8 +145,11 @@ function ProblemDetailsPanel({ problemDetails, setProblemDetails }) {
           className="mt-4 px-4 py-2 bg-gradient-to-b from-blue-500 to-blue-700 text-white font-medium rounded-lg shadow-lg transform hover:scale-105 active:scale-95 transition-transform duration-150 flex items-center space-x-2"
         >
           <AiOutlinePlus className="text-lg" />
-          {problemDetails.examples.length > 0 ? <span>Add Another Example</span> : <span>Add Example</span>}
-          
+          {problemDetails.examples.length > 0 ? (
+            <span>Add Another Example</span>
+          ) : (
+            <span>Add Example</span>
+          )}
         </button>
       </div>
 

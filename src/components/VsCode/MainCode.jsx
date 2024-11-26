@@ -1,23 +1,56 @@
-// here we use Output component see this here I think:
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { executeCode } from "../../API/api";
+import { infoNotify } from "../../hooks/useInfoMutaionToast";
+import useMutationToast from "../../hooks/useMutationToast";
+import {
+  useGetProgressQuery,
+  useGetTestCasesQuery,
+  useSubmitCodeMutation,
+} from "../../redux/api/api";
 import CodeEditor from "./CodeEditor";
 import CodeNavbar from "./CodeNavbar";
 import Output from "./Output";
-import ProblemDescription from "./ProblemDescription";
+import QuestionDescription from "./QuestionDescription";
+import { CODE_SNIPPETS } from "../../constants/constant";
 
 function MainCode() {
   const editorRef = useRef();
-  const { questionData, challenge } = useSelector((state) => state.auth);
+  const { challengeID, questionData, challenge } = useSelector(
+    (state) => state.auth
+  );
 
   const [language, setLanguage] = useState("cpp");
   const [outputVisible, setOutputVisible] = useState(false);
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [ErrorMessage, setErrorMessage] = useState("");
-  const [problem, setProblem] = useState(questionData);
-  const [showProblemList, setShowProblemList] = useState(false);
+  const [question, setQuestion] = useState(questionData);
+  const [showQuestionList, setShowQuestionList] = useState(false);
+
+  const [publicTestCases, setPublicTestCases] = useState([]);
+  const [publicTestResults, setPublicTestResults] = useState([]);
+
+  const { data, isSuccess } = useGetTestCasesQuery(question._id);
+
+  const { data: progressData } = useGetProgressQuery(challengeID);
+
+
+  const [submitCode, submitStatus] = useSubmitCodeMutation();
+
+  // Handle API response and update testCases
+  useEffect(() => {
+    if (isSuccess && Array.isArray(data.publicTestCases)) {
+      setPublicTestCases(data.publicTestCases);
+    }
+  }, [isSuccess, data?.publicTestCases]);
+
+  // Use the custom useMutationToast hook for each mutation
+  useMutationToast({
+    ...submitStatus,
+    loadingMessage: "Submitting the code...",
+    successMessage: submitStatus.data?.message,
+  });
 
   // New state to manage the editor content
   const [editorContent, setEditorContent] = useState(
@@ -25,11 +58,9 @@ function MainCode() {
   );
 
   useEffect(() => {
-    // Update editor content when language or problem changes
-    setEditorContent(problem.boilerplateCode[language] || "");
-  }, [language, problem]);
-
-  const toggleProblemList = () => setShowProblemList(!showProblemList);
+    // Update editor content when language or question changes
+    setEditorContent(question?.boilerplateCode?.[language] || "");
+  }, [language, question]);
 
   const onMount = (editor) => {
     editorRef.current = editor;
@@ -43,60 +74,107 @@ function MainCode() {
 
   const handleCloseOutput = () => setOutputVisible(false);
 
-  const runCode = () => {
-    const sourceCode = editorRef.current.getValue();
-    if (!sourceCode) return;
+  const runCode = (sourceCode) => {
+    return new Promise((resolve, reject) => {
+      setIsLoading(true);
+      setErrorMessage("");
 
-    const testCases = [
-      { input: ["5\n1 2 3 4 5"], expectedOutput: "15" },
-      { input: ["3\n10 20 30"], expectedOutput: "60" },
-      { input: ["4\n-5 5 -10 10"], expectedOutput: "0" },
-      // { input: ["2", "7 7"], expectedOutput: "14" },
-      // { input: ["3", "1 -1 1"], expectedOutput: "1" },
-    ];
-    
+      executeCode(language, sourceCode, publicTestCases)
+        .then((results) => {
+          setOutput(results);
+          const firstSyntaxError = results.find(
+            (result) => result.error
+          )?.error;
+          const allTestCasesPassed = results.every(
+            (result) => result.status === "Pass"
+          );
 
-    // Indicate loading started
-    setIsLoading(true);
+          setPublicTestResults(allTestCasesPassed);
 
-    // Clear the previous error message before starting the new run
-    setErrorMessage("");
+          if (firstSyntaxError) {
+            setErrorMessage(`Syntax Error: ${firstSyntaxError}`);
+          }
 
-    // Execute code
-    executeCode(language, sourceCode, testCases)
-      .then((results) => {
-        setOutput(results); // Directly set the results
-        const firstSyntaxError = results.find((result) => result.error)?.error;
-
-        if (firstSyntaxError) {
-          setErrorMessage(`Syntax Error: ${firstSyntaxError}`);
-        }
-      })
-      .catch((error) => {
-        console.error("Unable to run code", error);
-        setErrorMessage("An error occurred while executing the code.");
-      })
-      .finally(() => {
-        setIsLoading(false); // Indicate loading finished
-      });
+          resolve(results);
+        })
+        .catch((error) => {
+          console.error("Unable to run code", error);
+          setErrorMessage("An error occurred while executing the code.");
+          reject(error);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    });
   };
 
   const handleRun = () => {
-    runCode();
+    const sourceCode = editorRef.current.getValue();
+
+    if (!sourceCode) {
+      infoNotify(
+        "Your code editor is empty. Please write some code to proceed."
+      );
+      return;
+    }
+
     setOutputVisible(true);
+    runCode(sourceCode);
   };
 
-  const handleProblemSelect = (selectedProblem) => {
-    setProblem(selectedProblem);
-    setShowProblemList(false);
+  const handleSubmit = async () => {
+    const sourceCode = editorRef.current.getValue();
+
+    if (!sourceCode) {
+      infoNotify(
+        "Your code editor is empty. Please write some code to proceed."
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      setErrorMessage(""); // Reset error messages
+
+      const submissionData = {
+        challenge: challengeID,
+        question: question._id,
+        code: sourceCode,
+        language: language,
+      };
+
+      await submitCode(submissionData); // Submit the code after it's successfully run
+
+      // setOutputVisible(false); // Hide the output after submission
+    } catch (error) {
+      console.error("Error during submission:", error);
+      setErrorMessage("Submission failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleQuestionList = () => {
+    setShowQuestionList((prev) => !prev);
+  };
+
+  const handleQuestionSelect = (selectedQuestion) => {
+    setQuestion(selectedQuestion); // Set the selected question
+    setShowQuestionList(false); // Close the question list after selecting
+  };
+
+  const handleCloseQuestionList = () => {
+    setShowQuestionList(false); // Close the list explicitly
   };
 
   return (
     <div className="w-full min-h-screen bg-gray-100 flex flex-col items-center justify-center">
       <CodeNavbar
         handleRun={handleRun}
+        handleSubmit={handleSubmit}
         onSelect={onSelect}
-        toggleProblemList={toggleProblemList}
+        toggleQuestionList={toggleQuestionList}
         challenge={challenge}
       />
 
@@ -105,46 +183,68 @@ function MainCode() {
           outputVisible ? "grid-cols-12" : "grid-cols-8"
         }`}
       >
-        {/* Problem List */}
-        {showProblemList && (
+        {/* Question List */}
+        {showQuestionList && (
           <div className="absolute top-0 left-0 w-1/4 h-full bg-white shadow-lg p-4 rounded-r-lg border-r border-gray-300 z-10 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-700">
-                Select Problem
+                Select Question
               </h2>
               <button
-                onClick={toggleProblemList}
+                onClick={handleCloseQuestionList} // Explicitly handle closing
                 className="text-gray-500 hover:text-gray-700 p-1 rounded-full focus:outline-none transition duration-200"
               >
                 ✕
               </button>
             </div>
-            <ul className="space-y-2 overflow-y-auto h-full">
+            <ul className="space-y-3 overflow-y-auto h-full">
               {challenge &&
-                challenge.questions.map((prob, index) => (
-                  <li
-                    key={index}
-                    className={`p-3 rounded-lg cursor-pointer transition duration-200 ${
-                      prob.problemTitle === problem.problemTitle
-                        ? "bg-blue-100 text-blue-700 font-semibold"
-                        : "bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-700"
-                    }`}
-                    onClick={() => handleProblemSelect(prob)}
-                  >
-                    {prob.title}
-                  </li>
-                ))}
+                challenge.questions.map((ques, index) => {
+                  const isSolved = progressData?.progress?.solvedQuestions.some(
+                    (solvedQues) => solvedQues._id === ques._id
+                  );
+
+                  return (
+                    <li
+                      key={index}
+                      className={`p-4 rounded-lg cursor-pointer transition duration-200 border ${
+                        ques._id === question?._id
+                          ? "bg-blue-100 text-blue-700 border-blue-500 font-semibold"
+                          : "bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-700 border-gray-300"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="text-sm font-medium">{ques.title}</h3>
+                          <p className="text-xs text-gray-500">
+                            {ques.difficulty} • {ques.maxScore} points
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleQuestionSelect(ques)} // Close list on selection
+                          className={`px-4 py-1 text-sm font-medium rounded-lg transition duration-200 ${
+                            isSolved
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-blue-600 text-white hover:bg-blue-700"
+                          }`}
+                        >
+                          {isSolved ? "Solved" : "Solve"}
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         )}
 
-        {/* Problem Description */}
+        {/* Question Description */}
         <div
           className={`${
             outputVisible ? "col-span-4" : "col-span-3"
-          } h-full text-gray-900 overflow-y-auto`}
+          } h-full text-gray-900 `}
         >
-          <ProblemDescription problemData={problem} />
+          <QuestionDescription QuestionData={question} />
         </div>
 
         {/* Code Editor */}
@@ -158,7 +258,9 @@ function MainCode() {
           </div>
           <CodeEditor
             language={language}
-            value={editorContent}
+            value={
+              question.boilerplateCode?.[language] || CODE_SNIPPETS[language] // Default to snippet if boilerplate is empty
+            }
             onChange={setEditorContent}
             onMount={onMount}
           />

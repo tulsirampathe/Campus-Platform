@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useChallengeDataQuery } from "../../redux/api/api";
-import { setChallenge, setQuestionData } from "../../redux/reducers/auth";
+import {
+  useChallengeDataQuery,
+  useGetProgressQuery,
+} from "../../redux/api/api";
+import {
+  setChallenge,
+  setChallengeProgress,
+  setQuestionData,
+} from "../../redux/reducers/auth";
 import LoadingSpinner from "../LoadingSpinner";
 import ChallengeTimer from "./ChallengeTimer"; // Import your new component
 
@@ -18,6 +25,12 @@ function ParticipantChallengeOverviewPage() {
   const { data, isLoading: isChallengeLoading } =
     useChallengeDataQuery(challengeID);
   const challengeData = data?.challenge;
+
+  const { data: progressData, isSuccess } = useGetProgressQuery(challengeID);
+
+  useEffect(() => {
+    dispatch(setChallengeProgress(progressData?.progress));
+  }, [isSuccess]);
 
   const handleProblemClick = (question) => {
     dispatch(setQuestionData(question));
@@ -110,25 +123,38 @@ function ParticipantChallengeOverviewPage() {
           <div className="text-lg font-bold text-indigo-700 mb-4">
             <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 mt-8">
               {challengeData &&
-                challengeData.questions.map((question, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border-l-4 border-indigo-500 relative"
-                  >
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      {question.title}
-                    </h2>
-                    <p className="text-sm text-gray-600 mt-2">
-                      {question.description}
-                    </p>
-                    <button
-                      onClick={() => handleProblemClick(question)}
-                      className="mt-4 bg-indigo-600 text-white py-2 px-6 rounded-full font-medium shadow-lg hover:bg-indigo-700 transition duration-200 transform hover:scale-105"
+                challengeData.questions.map((question, index) => {
+                  const isSolved = progressData?.progress?.solvedQuestions.some(
+                    (solvedQues) => solvedQues._id === question._id
+                  );
+                  return (
+                    <div
+                      key={index}
+                      className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border-l-4 ${
+                        isSolved ? "border-green-500" : "border-indigo-500"
+                      }  relative`}
                     >
-                      View Problem
-                    </button>
-                  </div>
-                ))}
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        {question.title}
+                      </h2>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {question.description}
+                      </p>
+                      <button
+                        onClick={() => handleProblemClick(question)}
+                        className={`mt-4 ${
+                          isSolved ? "bg-green-600" : "bg-indigo-600"
+                        } text-white py-2 px-6 rounded-full font-medium shadow-lg ${
+                          isSolved
+                            ? "hover:bg-green-600"
+                            : "hover:bg-indigo-600"
+                        } transition duration-200 transform hover:scale-105`}
+                      >
+                        {isSolved ? "Solved" : "View Problem"}
+                      </button>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}

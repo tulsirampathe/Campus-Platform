@@ -3,12 +3,29 @@ import React from "react";
 
 function MetricsPanel({ problemDetails, setProblemDetails }) {
   return (
-    <div className="p-6 bg-white rounded-xl shadow-lg">
+    <div className="p-6 bg-white rounded-xl shadow-lg max-h-[600px]">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">
         Problem Metrics
       </h2>
       <div className="space-y-6">
-        
+        {/* Score */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Score
+          </label>
+          <input
+            type="number"
+            placeholder="Max Score"
+            className="border-2 border-gray-300 p-3 rounded-lg w-full focus:ring-2 focus:ring-blue-500 transition duration-300"
+            value={problemDetails.maxScore}
+            onChange={(e) =>
+              setProblemDetails({
+                ...problemDetails,
+                maxScore: e.target.value,
+              })
+            }
+          />
+        </div>
 
         {/* Difficulty Score */}
         <div>

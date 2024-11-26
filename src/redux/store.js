@@ -8,7 +8,16 @@ const store = configureStore({
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore specific actions or paths if needed
+        ignoredActions: [
+          // Example: If your API or auth actions are causing issues, ignore them here
+          "api/executeMutation/pending",
+        ],
+        ignoredPaths: ["auth.questionID"], // You can also ignore specific paths in the state
+      },
+    }).concat(api.middleware),
 });
 
 export default store;

@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import { FaCheckCircle, FaClock, FaTimesCircle } from "react-icons/fa";
+import { formatTime } from "../../constants/constant";
 
 function ChallengeTimer({
   challengeData,
@@ -50,19 +51,6 @@ function ChallengeTimer({
     hasEnded,
     onChallengeStatusChange,
   ]);
-
-  const formatTime = (time) => {
-    const hours = String(Math.floor((time / (1000 * 60 * 60)) % 24)).padStart(
-      2,
-      "0"
-    );
-    const minutes = String(Math.floor((time / (1000 * 60)) % 60)).padStart(
-      2,
-      "0"
-    );
-    const seconds = String(Math.floor((time / 1000) % 60)).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  };
 
   const gradingMessage = (score) => {
     if (score >= 90) return "Outstanding Performance!";

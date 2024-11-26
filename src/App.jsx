@@ -1,20 +1,28 @@
-import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import axios from "axios";
+
+// Components
 import NotProtectedLayout from "./components/auth/NotProtectedLayout";
 import ProtectRoute from "./components/auth/ProtectRoute";
+import UserProtectedLayout from "./components/auth/userProtectedLayout";
+import ChallengeOverviewPage from "./components/CreateChallenge/ChallengeOverviewPage";
 import About from "./components/homepage/About";
 import Body from "./components/homepage/Body";
+import LoadingSpinner from "./components/LoadingSpinner";
 import UserLogin from "./components/user/UserLogin";
 import ParticipantChallengeOverviewPage from "./components/userChallengePages/ParticipantChallengeOverviewPage";
 import MainCode from "./components/VsCode/MainCode";
-import { config, server } from "./constants/config";
+
+// Pages
 import AddQuestion from "./pages/host/AddQuestion";
 import ChallengeSetup from "./pages/host/ChallengeSetup";
 import HostDashboard from "./pages/host/HostDashboard";
 import AdminLogin from "./pages/host/HostLogin";
 import ProtectedLayout from "./pages/host/ProtectedLayout";
+
+// Redux Actions
 import {
   hostExists,
   hostLoading,
@@ -23,16 +31,17 @@ import {
   userLoading,
   userNotExists,
 } from "./redux/reducers/auth";
-import ChallengeOverviewPage from "./components/CreateChallenge/ChallengeOverviewPage";
-import LoadingSpinner from "./components/LoadingSpinner";
-import HomeNavbar from "./components/homepage/HomeNavbar";
-import UserProtectedLayout from "./components/auth/userProtectedLayout";
+
+// Config
+import { config, server } from "./constants/config";
 
 function App() {
-  const { host, loading, user } = useSelector((state) => state.auth);
-
+  const { host, loading, user, challengeProgress } = useSelector(
+    (state) => state.auth
+  );
   const dispatch = useDispatch();
 
+  // Check Host Authentication
   useEffect(() => {
     dispatch(hostLoading());
     axios
@@ -50,6 +59,7 @@ function App() {
       });
   }, [dispatch]);
 
+  // Check User Authentication
   useEffect(() => {
     dispatch(userLoading());
     axios
@@ -67,6 +77,7 @@ function App() {
       });
   }, [dispatch]);
 
+  // Show Loading Spinner
   if (loading.host || loading.user) {
     return <LoadingSpinner />;
   }
@@ -74,7 +85,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Host Routes */}
+        {/* Host Protected Routes */}
         <Route element={<ProtectRoute user={host} />}>
           <Route element={<ProtectedLayout />}>
             <Route path="/host-dashboard" element={<HostDashboard />} />
@@ -86,9 +97,7 @@ function App() {
         </Route>
 
         {/* Public Routes */}
-        <Route
-          element={<ProtectRoute user={!host} redirect="/host-dashboard" />}
-        >
+        <Route element={<ProtectRoute user={!host} redirect="/host-dashboard" />}>
           <Route element={<NotProtectedLayout />}>
             <Route path="/" element={<Body />} />
             <Route path="/about" element={<About />} />
@@ -97,8 +106,18 @@ function App() {
           </Route>
         </Route>
 
-        {/* Participant Routes with HomeNavbar */}
-        <Route element={<ProtectRoute user={user} />}>
+        {/* Participant Protected Routes */}
+        <Route
+          element={
+            <ProtectRoute
+              user={
+                challengeProgress
+                  ? challengeProgress.status !== "ended" && user
+                  : user
+              }
+            />
+          }
+        >
           <Route element={<UserProtectedLayout />}>
             <Route
               path="/challenge-page"

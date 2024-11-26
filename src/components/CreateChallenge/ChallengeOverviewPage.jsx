@@ -19,6 +19,7 @@ import {
   useChallengeDataQuery,
   useDeleteChallengeMutation,
   useEditChallengeDataMutation,
+  useGetLeaderboardQuery,
   useRemoveQuestionMutation,
 } from "../../redux/api/api";
 import ConfirmationDeleteModal from "../../shared/ConfirmationDeleteModal";
@@ -42,6 +43,16 @@ function ChallengeOverviewPage() {
   const [question, setQuestion] = useState("");
 
   const { challengeID } = useSelector((state) => state.auth);
+
+  // Inside ChallengeOverviewPage component
+  const { data: leaderboardData, isLoading: isLeaderboardLoading } =
+    useGetLeaderboardQuery(challengeID);
+
+  const leaderboard = leaderboardData?.leaderboard;
+
+  // console.log("leader : ", leaderboard);
+
+  const [activePanel, setActivePanel] = useState("leaderboard");
 
   const { data, isLoading: isChallengeLoading } =
     useChallengeDataQuery(challengeID);
@@ -142,9 +153,10 @@ function ChallengeOverviewPage() {
 
   return (
     <div className="flex p-8 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-      {/* Left Side: Challenge Header */}
+      {/* Left Side: Challenge Header and Section */}
       <div className="w-full md:w-1/3 p-4">
-        <header className="p-8 rounded-lg bg-white shadow-lg">
+        {/* Header */}
+        <header className="p-8 rounded-lg bg-white shadow-lg w-full mb-6">
           <h1 className="text-4xl font-extrabold text-indigo-700 mb-2">
             {challengeData.title}
           </h1>
@@ -310,6 +322,114 @@ function ChallengeOverviewPage() {
             </>
           )}
         </header>
+
+        {/* Leaderboard and Participation Panel */}
+        <section className="w-full p-6 bg-white rounded-lg shadow-lg">
+          {/* Tabs */}
+          <div className="flex border-b">
+            {["leaderboard", "participation"].map((panel) => (
+              <button
+                key={panel}
+                onClick={() => setActivePanel(panel)}
+                className={`w-1/2 py-3 text-lg font-bold transition ${
+                  activePanel === panel
+                    ? activePanel === "leaderboard"
+                      ? "text-indigo-600 border-b-4 border-indigo-600"
+                      : "text-green-600 border-b-4 border-green-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {panel.charAt(0).toUpperCase() + panel.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Panel Content */}
+          <div className="p-4 bg-gray-50 rounded-b-lg max-h-[400px] overflow-y-auto">
+            {activePanel === "leaderboard" && (
+              <div>
+                {isLeaderboardLoading ? (
+                  <div className="text-center text-indigo-600">
+                    Loading leaderboard...
+                  </div>
+                ) : leaderboard && leaderboard.participants.length > 0 ? (
+                  <div className="overflow-auto">
+                    <table className="w-full table-auto border-collapse rounded-lg shadow-md">
+                      <thead>
+                        <tr className="bg-indigo-600 text-white text-left">
+                          <th className="px-4 py-2">Rank</th>
+                          <th className="px-4 py-2">Name</th>
+                          <th className="px-4 py-2 text-right">Points</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {leaderboard.participants.map((participant, idx) => (
+                          <tr
+                            key={idx}
+                            className={`${
+                              idx % 2 === 0 ? "bg-indigo-100" : "bg-white"
+                            } hover:bg-indigo-200 transition`}
+                          >
+                            <td className="px-4 py-2">{idx + 1}</td>
+                            <td className="px-4 py-2">{participant.user.username}</td>
+                            <td className="px-4 py-2 text-right">
+                              {participant.totalScore} pts
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center text-indigo-600">
+                    No leaderboard data available.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activePanel === "participation" && (
+              <div>
+                {isChallengeLoading ? (
+                  <div className="text-center text-green-600">
+                    Loading participants...
+                  </div>
+                ) : challengeData?.participants &&
+                  challengeData.participants.length > 0 ? (
+                  <div className="overflow-auto">
+                    <table className="w-full table-auto border-collapse rounded-lg shadow-md">
+                      <thead>
+                        <tr className="bg-green-600 text-white text-left">
+                          <th className="px-4 py-2">Rank</th>
+                          <th className="px-4 py-2">Username</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {challengeData.participants.map((participant, idx) => (
+                          <tr
+                            key={idx}
+                            className={`${
+                              idx % 2 === 0 ? "bg-green-100" : "bg-white"
+                            } hover:bg-green-200 transition`}
+                          >
+                            <td className="px-4 py-2">{idx + 1}</td>
+                            <td className="px-4 py-2">
+                              {participant.username}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center text-green-600">
+                    No participants found for this challenge.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
       {/* Modal for Delete Confirmation */}
@@ -323,82 +443,87 @@ function ChallengeOverviewPage() {
 
       {/* Right Side: Problem List */}
       <div className="w-full md:w-2/3 p-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 mt-8">
-          {challengeData &&
-            challengeData.questions.map((question, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border-l-4 border-indigo-500 relative"
-              >
-                <h2 className="text-xl font-semibold text-gray-800 mb-2 line-clamp-1">
-                  {question.title}
-                </h2>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-1">
-                  {question.problemStatement}
-                </p>
+        <h2 className="text-2xl font-bold text-indigo-700">
+          Challenge Questions
+        </h2>
+        <div className=" rounded-xl  max-h-[500px] overflow-y-auto custom-scrollbar ">
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 mt-2">
+            {challengeData &&
+              challengeData.questions.map((question, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border-l-4 border-indigo-500 relative"
+                >
+                  <h2 className="text-xl font-semibold text-gray-800 mb-2 line-clamp-1">
+                    {question.title}
+                  </h2>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-1">
+                    {question.problemStatement}
+                  </p>
 
-                <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
-                  <div className="flex items-center gap-2">
-                    <FaClock className="text-indigo-500" />
-                    <span className="font-medium">
-                      {question?.timeLimit} min
-                    </span>
+                  <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
+                    <div className="flex items-center gap-2">
+                      <FaClock className="text-indigo-500" />
+                      <span className="font-medium">
+                        {question?.timeLimit} min
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaTrophy className="text-yellow-500" />
+                      <span className="font-medium">
+                        {question?.maxScore} Points
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <FaTrophy className="text-yellow-500" />
-                    <span className="font-medium">
-                      {question?.maxScore} Points
-                    </span>
+
+                  <div className="flex justify-between items-center">
+                    <button
+                      onClick={() => handleEditProblem(question._id)}
+                      className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-200"
+                    >
+                      <FaEdit />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => DeleteProblemConform(question._id)}
+                      className="flex items-center gap-2 text-red-600 hover:text-red-800 font-semibold transition-colors duration-200"
+                    >
+                      <FaTrash />
+                      <span>Delete</span>
+                    </button>
+
+                    {/* Modal for Delete Confirmation */}
+                    <ConfirmationDeleteModal
+                      isOpen={isQuestionModalOpen}
+                      onClose={() => setIsQuestionModalOpen(false)}
+                      onConfirm={handleDeleteProblem}
+                      title="Delete Problem"
+                      message="Are you sure you want to delete this problem? This action cannot be undone."
+                    />
+
+                    {/* Updated Test Case Button */}
+                    <button
+                      onClick={() => handleTestCaseToggle(question._id)}
+                      className=" gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-200"
+                    >
+                      {question.testCases?.length > 0 ? (
+                        <>
+                          <span className="text-lg font-bold text-indigo-600">
+                            {question.testCases.length} Test Case
+                            {question.testCases.length > 1 ? "s" : ""}
+                          </span>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <FaPlus className="text-indigo-600" />
+                          <span className="text-sm">Add Test Cases</span>
+                        </div>
+                      )}
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex justify-between items-center">
-                  <button
-                    onClick={() => handleEditProblem(question._id)}
-                    className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-200"
-                  >
-                    <FaEdit />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => DeleteProblemConform(question._id)}
-                    className="flex items-center gap-2 text-red-600 hover:text-red-800 font-semibold transition-colors duration-200"
-                  >
-                    <FaTrash />
-                    <span>Delete</span>
-                  </button>
-
-                  {/* Modal for Delete Confirmation */}
-                  <ConfirmationDeleteModal
-                    isOpen={isQuestionModalOpen}
-                    onClose={() => setIsQuestionModalOpen(false)}
-                    onConfirm={handleDeleteProblem} // Call delete function on confirm
-                    title="Delete Problem"
-                    message="Are you sure you want to delete this problem? This action cannot be undone."
-                  />
-
-                  {/* Updated Test Case Button */}
-                  <button
-                    onClick={() => handleTestCaseToggle(question._id)}
-                    className=" gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors duration-200"
-                  >
-                    {question.testCases?.length > 0 ? (
-                      <>
-                        <span className="text-lg font-bold text-indigo-600">
-                          {question.testCases.length} Test Case
-                          {question.testCases.length > 1 ? "s" : ""}
-                        </span>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <FaPlus className="text-indigo-600" />
-                        <span className="text-sm">Add Test Cases</span>
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+          </div>
         </div>
       </div>
 

@@ -2,13 +2,11 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
-  AiFillEye,
-  AiFillEyeInvisible,
   AiOutlineDelete,
-  AiOutlineEdit,
-  AiOutlineFileSearch,
+  AiOutlineEdit
 } from "react-icons/ai";
 import { useSelector } from "react-redux";
+import useMutationToast from "../../hooks/useMutationToast";
 import {
   useAddTestCaseMutation,
   useDeleteTestCaseMutation,
@@ -16,12 +14,12 @@ import {
   useUpdateTestCaseMutation,
 } from "../../redux/api/api";
 import ConfirmationDeleteModal from "../../shared/ConfirmationDeleteModal";
-import useMutationToast from "../../hooks/useMutationToast";
 
 function TestCasesPanel() {
   const { questionID } = useSelector((state) => state.auth);
   const [testCases, setTestCases] = useState([]);
   const { data, isSuccess } = useGetTestCasesQuery(questionID);
+  
 
   const [addTestCase, addTestCaseStatus] = useAddTestCaseMutation();
   const [updateTestCase, updateTestCaseStatus] = useUpdateTestCaseMutation();
@@ -33,8 +31,6 @@ function TestCasesPanel() {
     successMessage:
       addTestCaseStatus.data?.message || "Test case added successfully!",
   });
-
-  console.log(testCases);
   
 
   useMutationToast({

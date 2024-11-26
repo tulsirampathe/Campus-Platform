@@ -1,16 +1,19 @@
-// AdminLogin.js
+// HostLogin.js
 import axios from "axios";
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { config, server } from "../../constants/config";
 import { hostExists } from "../../redux/reducers/auth";
 
-function AdminLogin() {
+function HostLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevents the default form submission behavior
@@ -23,8 +26,6 @@ function AdminLogin() {
         config // Additional config, like headers or token
       );
 
-      
-
       // Destructuring the response
       const { success, message, host } = data; // 'data' is the entire response object
 
@@ -32,6 +33,7 @@ function AdminLogin() {
         // Dispatching host data to Redux store
         dispatch(hostExists(host)); // 'hostData' contains the host information
         toast.success(message); // Displaying success message from the API
+        navigate("/host-dashboard");
       }
     } catch (error) {
       // If there was an error, show the error message
@@ -98,4 +100,4 @@ function AdminLogin() {
   );
 }
 
-export default AdminLogin;
+export default HostLogin;
