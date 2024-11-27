@@ -15,6 +15,7 @@ const api = createApi({
     "Submissions",
     "SubmitCode",
     "Progress",
+    "Leaderboard",
   ],
 
   endpoints: (builder) => ({
@@ -229,6 +230,7 @@ const api = createApi({
         url: `challenge/leaderboard/${id}`,
         credentials: "include",
       }),
+      providesTags: ["Leaderboard"],
     }),
   }),
 });

@@ -54,7 +54,7 @@ function MetricsPanel({ problemDetails, setProblemDetails }) {
             Estimated Solve Time (minutes)
           </label>
           <input
-            type="number"
+            type="text"
             min="1"
             placeholder="Estimated Solve Time"
             className="border-2 border-gray-300 p-3 rounded-lg w-full focus:ring-2 focus:ring-blue-500 transition duration-300"
